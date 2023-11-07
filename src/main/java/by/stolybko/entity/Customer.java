@@ -1,10 +1,13 @@
 package by.stolybko.entity;
 
 
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@Data
 public class Customer {
     private UUID id;
     private String firstName;
