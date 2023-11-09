@@ -1,10 +1,10 @@
 package by.stolybko;
 
-import by.stolybko.parser.Lexeme;
+import by.stolybko.api.parser.Lexeme;
 
 import java.util.List;
 
-import static by.stolybko.parser.Lexeme.lexAnalyze;
+import static by.stolybko.api.parser.ParserJson.lexAnalyze;
 
 public class Lexem {
 

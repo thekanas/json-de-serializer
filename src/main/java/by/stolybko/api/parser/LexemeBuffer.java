@@ -1,4 +1,4 @@
-package by.stolybko.parser;
+package by.stolybko.api.parser;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package by.stolybko.parser;
+package by.stolybko.api.parser;
 
 public enum LexemeType {
     START_OBJECT, END_OBJECT,
