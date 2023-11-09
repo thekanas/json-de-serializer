@@ -3,6 +3,7 @@ package by.stolybko.api.parser;
 import java.util.List;
 
 public class LexemeBuffer {
+
     private int pos;
 
     public List<Lexeme> lexemes;
@@ -23,7 +24,6 @@ public class LexemeBuffer {
                 return lexemeKey;
             }
         }
-
         return null;
     }
 
@@ -45,14 +45,17 @@ public class LexemeBuffer {
         for(int i = pos; i < lexemes.size(); i++) {
             Lexeme lexemeValue = lexemes.get(i);
             if(lexemeValue.getType() == LexemeType.START_OBJECT) {
-                start = i;
-                pos = i;
+                start = i + 1;
+                pos = start;
                 check++;
                 break;
             }
         }
         for(int i = pos; i < lexemes.size(); i++) {
             Lexeme lexemeValue = lexemes.get(i);
+            if(lexemeValue.getType() == LexemeType.START_OBJECT) {
+                check++;
+            }
             if(lexemeValue.getType() == LexemeType.END_OBJECT) {
                 check--;
                 if (check == 0) {
@@ -62,8 +65,36 @@ public class LexemeBuffer {
                 }
             }
         }
+        return lexemes.subList(start, end);
+    }
 
-
+    public List<Lexeme> nextArray() {
+        int start = 0;
+        int end = 0;
+        int check = 0;
+        for(int i = pos; i < lexemes.size(); i++) {
+            Lexeme lexemeValue = lexemes.get(i);
+            if(lexemeValue.getType() == LexemeType.START_ARRAY) {
+                start = i + 1;
+                pos = start;
+                check++;
+                break;
+            }
+        }
+        for(int i = pos; i < lexemes.size(); i++) {
+            Lexeme lexemeValue = lexemes.get(i);
+            if(lexemeValue.getType() == LexemeType.START_ARRAY) {
+                check++;
+            }
+            if(lexemeValue.getType() == LexemeType.END_ARRAY) {
+                check--;
+                if (check == 0) {
+                    end = i+1;
+                    pos = end;
+                    break;
+                }
+            }
+        }
         return lexemes.subList(start, end);
     }
 
