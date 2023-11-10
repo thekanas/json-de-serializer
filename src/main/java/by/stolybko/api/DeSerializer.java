@@ -1,5 +1,6 @@
 package by.stolybko.api;
 
+import by.stolybko.api.exception.ClassAndJsonMappingException;
 import by.stolybko.api.parser.Lexeme;
 import by.stolybko.api.parser.LexemeBuffer;
 import by.stolybko.api.parser.ParserJson;
@@ -9,29 +10,35 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class DeSerializer {
 
-    private final List<Class<?>> wrapper = List.of(String.class, Integer.class, Double.class, UUID.class, Boolean.class,
-                                                LocalDate.class, LocalDateTime.class, OffsetDateTime.class );
+    private static final List<Class<?>> wrapper = List.of(String.class, Integer.class, Double.class, UUID.class, Boolean.class,
+            LocalDate.class, LocalDateTime.class, OffsetDateTime.class);
 
 
-    public <T> T deSerializerJson(Class<T> clazz, String json) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        List<Lexeme> lexemes = ParserJson.lexAnalyze(json);
-        return deSerializer(clazz, lexemes);
+    public <T> T deSerializerJson(Class<T> clazz, String json) {
+        if ("null".equals(json) || json == null) return null;
+        List<Lexeme> lexemes;
+        T obj;
+        try {
+            lexemes = ParserJson.parseJson(json);
+            obj = deSerializer(clazz, lexemes);
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchFieldException | ClassNotFoundException e) {
+            throw new ClassAndJsonMappingException(e.getClass() + ": " + e.getMessage());
+        }
+        return obj;
     }
 
 
     private <T> T deSerializer(Class<T> clazz, List<Lexeme> lexemes) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
-
-        Object obj = clazz.getConstructor().newInstance();
+        T obj = clazz.getConstructor().newInstance();
         LexemeBuffer lexemeBuffer = new LexemeBuffer(lexemes);
         Lexeme lexemeKey = lexemeBuffer.nextKey();
 
@@ -39,17 +46,15 @@ public class DeSerializer {
             Field field = clazz.getDeclaredField(lexemeKey.getValue());
             field.setAccessible(true);
 
-            if(isWrapper(field.getType()) || field.getType().isPrimitive()) {
+            if (isWrapper(field.getType()) || field.getType().isPrimitive()) {
                 Lexeme lexemeValue = lexemeBuffer.nextValue();
                 Object value = getValue(field.getType().getSimpleName(), lexemeValue.getValue());
                 field.set(obj, value);
-            }
-            else if (Collection.class.isAssignableFrom(field.getType())) {
+            } else if (Collection.class.isAssignableFrom(field.getType())) {
                 List<Lexeme> lexemeArray = lexemeBuffer.nextArray();
                 Object subObjectArray = getCollection(field, lexemeArray);
                 field.set(obj, subObjectArray);
-            }
-            else {
+            } else {
                 Object value = deSerializer(field.getType(), lexemeBuffer.nextObject());
                 field.set(obj, value);
             }
@@ -58,12 +63,12 @@ public class DeSerializer {
 
         } while (lexemeKey != null);
 
-        return (T) obj;
+        return obj;
 
     }
 
 
-    private Object getValue(String name, String value) throws NoSuchFieldException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    private Object getValue(String name, String value) {
         return switch (name) {
             case "String" -> value;
             case "UUID" -> UUID.fromString(value);
@@ -83,7 +88,7 @@ public class DeSerializer {
         String type = String.valueOf(field.getGenericType());
         Class<?> elementClass = Class.forName(type.substring(type.indexOf("<") + 1, type.indexOf(">")));
 
-        if("List".equals(fieldType)) {
+        if ("List".equals(fieldType)) {
             List<Object> subObjectList = new ArrayList<>();
             List<Lexeme> lexemeNextObject = lexemeBufferArray.nextObject();
             while (lexemeNextObject != null && lexemeNextObject.size() != 0) {
@@ -93,14 +98,14 @@ public class DeSerializer {
             return subObjectList;
         }
 
-        if("Set".equals(fieldType)) {
-            Set<Object> subObjectList = new LinkedHashSet<>();
+        if ("Set".equals(fieldType)) {
+            Set<Object> subObjectSet = new HashSet<>();
             List<Lexeme> lexemeNextObject = lexemeBufferArray.nextObject();
             while (lexemeNextObject != null && lexemeNextObject.size() != 0) {
-                subObjectList.add(deSerializer(elementClass, lexemeNextObject));
+                subObjectSet.add(deSerializer(elementClass, lexemeNextObject));
                 lexemeNextObject = lexemeBufferArray.nextObject();
             }
-            return subObjectList;
+            return subObjectSet;
         }
 
         return null;

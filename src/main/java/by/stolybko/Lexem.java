@@ -1,11 +1,10 @@
 package by.stolybko;
 
 import by.stolybko.api.parser.Lexeme;
-import by.stolybko.api.parser.LexemeBuffer;
 
 import java.util.List;
 
-import static by.stolybko.api.parser.ParserJson.lexAnalyze;
+import static by.stolybko.api.parser.ParserJson.parseJson;
 
 public class Lexem {
 
@@ -16,19 +15,14 @@ public class Lexem {
             {
                  "id": "1024a45d-f272-4189-a58c-fc24f2822bad",
                  "firstName": "Reuben",
-                 "lastName": "Martin",
-                 "dateBirth": "2003-11-03",
                  "orders": [
                      {
-                         "id": "2024a45d-f272-4189-a58c-fc24f2822bad",
                          "products": [
                              {
-                                 "id": "3024a45d-f272-4189-a58c-fc24f2822bac",
                                  "name": "1colbasa",
                                  "price": 205.6
                              },
                              {
-                                 "id": "4024a45d-f272-4189-a58c-fc24f2822bac",
                                  "name": "1colbasa",
                                  "price": 255.6
                              }
@@ -46,12 +40,12 @@ public class Lexem {
 
         }*/
 
-        List<Lexeme> lexems = lexAnalyze(json);
-        LexemeBuffer lexemeBuffer1 = new LexemeBuffer(lexems);
-        List<Lexeme> nextArray1 = lexemeBuffer1.nextObject();
-        LexemeBuffer lexemeBuffer2 = new LexemeBuffer(nextArray1);
-        List<Lexeme> nextArray2 = lexemeBuffer2.nextObject();
-        for (Lexeme lexeme : nextArray2)
-            System.out.println(lexeme.getValue());
+        List<Lexeme> lexems = parseJson(json);
+//        LexemeBuffer lexemeBuffer1 = new LexemeBuffer(lexems);
+//        List<Lexeme> nextArray1 = lexemeBuffer1.nextObject();
+//        LexemeBuffer lexemeBuffer2 = new LexemeBuffer(nextArray1);
+//        List<Lexeme> nextArray2 = lexemeBuffer2.nextObject();
+        for (Lexeme lexeme : lexems)
+            System.out.println(lexeme);
     }
 }
