@@ -23,13 +23,13 @@ public class DeSerializer {
             LocalDate.class, LocalDateTime.class, OffsetDateTime.class);
 
 
-    public <T> T deSerializerJson(Class<T> clazz, String json) {
+    public <T> T deSerializingJson(Class<T> clazz, String json) {
         if ("null".equals(json) || json == null) return null;
         List<Lexeme> lexemes;
         T obj;
         try {
             lexemes = ParserJson.parseJson(json);
-            obj = deSerializer(clazz, lexemes);
+            obj = deSerializing(clazz, lexemes);
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchFieldException | ClassNotFoundException e) {
             throw new ClassAndJsonMappingException(e.getClass() + ": " + e.getMessage());
         }
@@ -37,7 +37,7 @@ public class DeSerializer {
     }
 
 
-    private <T> T deSerializer(Class<T> clazz, List<Lexeme> lexemes) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
+    private <T> T deSerializing(Class<T> clazz, List<Lexeme> lexemes) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
         T obj = clazz.getConstructor().newInstance();
         LexemeBuffer lexemeBuffer = new LexemeBuffer(lexemes);
         Lexeme lexemeKey = lexemeBuffer.nextKey();
@@ -55,7 +55,7 @@ public class DeSerializer {
                 Object subObjectArray = getCollection(field, lexemeArray);
                 field.set(obj, subObjectArray);
             } else {
-                Object value = deSerializer(field.getType(), lexemeBuffer.nextObject());
+                Object value = deSerializing(field.getType(), lexemeBuffer.nextObject());
                 field.set(obj, value);
             }
 
@@ -92,7 +92,7 @@ public class DeSerializer {
             List<Object> subObjectList = new ArrayList<>();
             List<Lexeme> lexemeNextObject = lexemeBufferArray.nextObject();
             while (lexemeNextObject != null && lexemeNextObject.size() != 0) {
-                subObjectList.add(deSerializer(elementClass, lexemeNextObject));
+                subObjectList.add(deSerializing(elementClass, lexemeNextObject));
                 lexemeNextObject = lexemeBufferArray.nextObject();
             }
             return subObjectList;
@@ -102,7 +102,7 @@ public class DeSerializer {
             Set<Object> subObjectSet = new HashSet<>();
             List<Lexeme> lexemeNextObject = lexemeBufferArray.nextObject();
             while (lexemeNextObject != null && lexemeNextObject.size() != 0) {
-                subObjectSet.add(deSerializer(elementClass, lexemeNextObject));
+                subObjectSet.add(deSerializing(elementClass, lexemeNextObject));
                 lexemeNextObject = lexemeBufferArray.nextObject();
             }
             return subObjectSet;

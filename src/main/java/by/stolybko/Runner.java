@@ -1,6 +1,7 @@
 package by.stolybko;
 
 import by.stolybko.api.DeSerializer;
+import by.stolybko.api.Serializer;
 import by.stolybko.entity.Store;
 
 
@@ -73,11 +74,13 @@ static String json = """
     ]
 }
             """;
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException {
 
         DeSerializer deSerializer = new DeSerializer();
-        Store store = deSerializer.deSerializerJson(Store.class, json);
+        Store store = deSerializer.deSerializingJson(Store.class, json);
         System.out.println(store);
+        Serializer serializer = new Serializer();
+        System.out.println(serializer.serializing(store));
 
     }
 }
