@@ -74,13 +74,13 @@ static String json = """
     ]
 }
             """;
-    public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException {
+    public static void main(String[] args) {
 
         DeSerializer deSerializer = new DeSerializer();
         Store store = deSerializer.deSerializingJson(Store.class, json);
         System.out.println(store);
         Serializer serializer = new Serializer();
-        System.out.println(serializer.serializing(store));
+        System.out.println(serializer.serializingInJson(store));
 
     }
 }

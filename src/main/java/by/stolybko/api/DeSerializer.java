@@ -4,7 +4,7 @@ import by.stolybko.api.exception.ClassAndJsonMappingException;
 import by.stolybko.api.parser.Lexeme;
 import by.stolybko.api.parser.LexemeBuffer;
 import by.stolybko.api.parser.ParserJson;
-
+import by.stolybko.api.utils.ClassConstants;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
@@ -18,10 +18,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class DeSerializer {
-
-    private static final List<Class<?>> wrapper = List.of(String.class, Integer.class, Double.class, UUID.class, Boolean.class,
-            LocalDate.class, LocalDateTime.class, OffsetDateTime.class);
-
 
     public <T> T deSerializingJson(Class<T> clazz, String json) {
         if ("null".equals(json) || json == null) return null;
@@ -46,7 +42,7 @@ public class DeSerializer {
             Field field = clazz.getDeclaredField(lexemeKey.getValue());
             field.setAccessible(true);
 
-            if (isWrapper(field.getType()) || field.getType().isPrimitive()) {
+            if (ClassConstants.isWrapper(field.getType()) || ClassConstants.isCommonClass(field.getType()) || field.getType().isPrimitive()) {
                 Lexeme lexemeValue = lexemeBuffer.nextValue();
                 Object value = getValue(field.getType().getSimpleName(), lexemeValue.getValue());
                 field.set(obj, value);
@@ -60,25 +56,26 @@ public class DeSerializer {
             }
 
             lexemeKey = lexemeBuffer.nextKey();
-
         } while (lexemeKey != null);
-
         return obj;
-
     }
-
 
     private Object getValue(String name, String value) {
         return switch (name) {
             case "String" -> value;
-            case "UUID" -> UUID.fromString(value);
+            case "Byte", "byte" -> Byte.valueOf(value);
+            case "Short", "short" -> Short.valueOf(value);
             case "Integer", "int" -> Integer.valueOf(value);
+            case "Long", "long" -> Long.valueOf(value);
+            case "Float", "float" -> Float.valueOf(value);
             case "Double", "double" -> Double.valueOf(value);
             case "Boolean", "boolean" -> Boolean.valueOf(value);
+            case "Character", "character" -> value.charAt(0);
+            case "UUID" -> UUID.fromString(value);
             case "LocalDate" -> LocalDate.parse(value);
             case "LocalDateTime" -> LocalDateTime.parse(value);
             case "OffsetDateTime" -> OffsetDateTime.parse(value);
-            default -> null;
+            default -> throw new ClassAndJsonMappingException("Class: " + name + " is not supported. Needed to add class support");
         };
     }
 
@@ -96,9 +93,7 @@ public class DeSerializer {
                 lexemeNextObject = lexemeBufferArray.nextObject();
             }
             return subObjectList;
-        }
-
-        if ("Set".equals(fieldType)) {
+        } else if ("Set".equals(fieldType)) {
             Set<Object> subObjectSet = new HashSet<>();
             List<Lexeme> lexemeNextObject = lexemeBufferArray.nextObject();
             while (lexemeNextObject != null && lexemeNextObject.size() != 0) {
@@ -106,12 +101,8 @@ public class DeSerializer {
                 lexemeNextObject = lexemeBufferArray.nextObject();
             }
             return subObjectSet;
+        } else {
+            throw new ClassAndJsonMappingException("Collection: " + fieldType + " is not supported. Needed to add collection support");
         }
-
-        return null;
-    }
-
-    private boolean isWrapper(Class<?> clazz) {
-        return wrapper.contains(clazz);
     }
 }

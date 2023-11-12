@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class Temp {
-    public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException {
+    public static void main(String[] args) {
 
 
         Product product1 = new Product(UUID.fromString("4024a45d-f272-4189-a58c-fc24f2822bac"), "baton", 12.12);
@@ -18,6 +18,6 @@ public class Temp {
 
 
         Serializer serializer = new Serializer();
-        System.out.println(serializer.serializing(order));
+        System.out.println(serializer.serializingInJson(order));
     }
 }
