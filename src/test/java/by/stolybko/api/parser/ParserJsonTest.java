@@ -15,26 +15,26 @@ class ParserJsonTest {
     void parseJson() {
         // given
         String json = """
-                {
-                 "id": "1024a45d-f272-4189-a58c-fc24f2822bad",
-                 "firstName": "Reuben",
-                 "orders": [
-                     {
-                         "products": [
-                             {
-                                 "name": "1colbasa",
-                                 "price": 205.6
-                             },
-                             {
-                                 "name": "1colbasa",
-                                 "price": 255.6
-                             }
-                         ],
-                         "createDate": "2021-09-30T15:30:00+01:00"
-                     }
-                 ]
-             }
-                """;
+                   {
+                    "id": "1024a45d-f272-4189-a58c-fc24f2822bad",
+                    "firstName": "Reuben",
+                    "orders": [
+                        {
+                            "products": [
+                                {
+                                    "name": "1colbasa",
+                                    "price": 205.6
+                                },
+                                {
+                                    "name": "1colbasa",
+                                    "price": 255.6
+                                }
+                            ],
+                            "createDate": "2021-09-30T15:30:00+01:00"
+                        }
+                    ]
+                }
+                   """;
 
         List<Lexeme> expected = List.of(
                 new Lexeme(LexemeType.START_OBJECT, "{"),

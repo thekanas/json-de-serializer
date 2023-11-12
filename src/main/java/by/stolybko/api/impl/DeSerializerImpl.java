@@ -6,17 +6,14 @@ import by.stolybko.api.parser.Lexeme;
 import by.stolybko.api.parser.LexemeBuffer;
 import by.stolybko.api.parser.ParserJson;
 import by.stolybko.api.utils.ClassConstants;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 public class DeSerializerImpl implements DeSerializer {
 
@@ -29,7 +26,7 @@ public class DeSerializerImpl implements DeSerializer {
             lexemes = ParserJson.parseJson(json);
             obj = deSerializing(clazz, lexemes);
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchFieldException | ClassNotFoundException e) {
-            throw new ClassAndJsonMappingException(e.getClass() + ": " + e.getMessage());
+            throw new ClassAndJsonMappingException(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
         return obj;
     }
@@ -46,7 +43,7 @@ public class DeSerializerImpl implements DeSerializer {
 
             if (ClassConstants.isWrapper(field.getType()) || ClassConstants.isCommonClass(field.getType()) || field.getType().isPrimitive()) {
                 Lexeme lexemeValue = lexemeBuffer.nextValue();
-                Object value = getValue(field.getType().getSimpleName(), lexemeValue.getValue());
+                Object value = ClassConstants.getValue(field.getType().getSimpleName(), lexemeValue.getValue());
                 field.set(obj, value);
             } else if (Collection.class.isAssignableFrom(field.getType())) {
                 List<Lexeme> lexemeArray = lexemeBuffer.nextArray();
@@ -60,25 +57,6 @@ public class DeSerializerImpl implements DeSerializer {
             lexemeKey = lexemeBuffer.nextKey();
         } while (lexemeKey != null);
         return obj;
-    }
-
-    private Object getValue(String name, String value) {
-        return switch (name) {
-            case "String" -> value;
-            case "Byte", "byte" -> Byte.valueOf(value);
-            case "Short", "short" -> Short.valueOf(value);
-            case "Integer", "int" -> Integer.valueOf(value);
-            case "Long", "long" -> Long.valueOf(value);
-            case "Float", "float" -> Float.valueOf(value);
-            case "Double", "double" -> Double.valueOf(value);
-            case "Boolean", "boolean" -> Boolean.valueOf(value);
-            case "Character", "character" -> value.charAt(0);
-            case "UUID" -> UUID.fromString(value);
-            case "LocalDate" -> LocalDate.parse(value);
-            case "LocalDateTime" -> LocalDateTime.parse(value);
-            case "OffsetDateTime" -> OffsetDateTime.parse(value);
-            default -> throw new ClassAndJsonMappingException("Class: " + name + " is not supported. Needed to add class support");
-        };
     }
 
     private Object getCollection(Field field, List<Lexeme> lexemeArray) throws ClassNotFoundException, NoSuchFieldException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
