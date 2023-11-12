@@ -2,6 +2,8 @@ package by.stolybko;
 
 import by.stolybko.api.DeSerializer;
 import by.stolybko.api.Serializer;
+import by.stolybko.api.impl.DeSerializerImpl;
+import by.stolybko.api.impl.SerializerImpl;
 import by.stolybko.entity.Store;
 
 
@@ -76,10 +78,10 @@ static String json = """
             """;
     public static void main(String[] args) {
 
-        DeSerializer deSerializer = new DeSerializer();
+        DeSerializer deSerializer = new DeSerializerImpl();
         Store store = deSerializer.deSerializingJson(Store.class, json);
         System.out.println(store);
-        Serializer serializer = new Serializer();
+        Serializer serializer = new SerializerImpl();
         System.out.println(serializer.serializingInJson(store));
 
     }

@@ -1,6 +1,6 @@
 package by.stolybko;
 
-import by.stolybko.api.Serializer;
+import by.stolybko.api.impl.SerializerImpl;
 import by.stolybko.entity.Order;
 import by.stolybko.entity.Product;
 
@@ -17,7 +17,7 @@ public class Temp {
         Order order = new Order(UUID.fromString("1024a45d-f272-4189-a58c-fc24f2822bac"), List.of(product1, product2), OffsetDateTime.now());
 
 
-        Serializer serializer = new Serializer();
+        SerializerImpl serializer = new SerializerImpl();
         System.out.println(serializer.serializingInJson(order));
     }
 }
