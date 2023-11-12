@@ -1,16 +1,15 @@
-# Task
-1. Создать любой gradle проект
-2. Проект должен быть совместим с java 17
-3. Придерживаться GitFlow: master -> develop -> feature/fix
-4. Разработать библиотеку, которая будет формировать на основе Java класса json и обратно
-5. Использовать рефлексию
-6. Предусмотреть возможную вложенность объектов (рекурсия), смотрите приложение I
-7. Покрыть код unit tests (можно использовать jackson/gson)
-8. Использовать lombok
+package by.stolybko;
 
-Разработанна библиотека которая парсит json в объекты и обратно используя рефлексию и рекурсию.
-Пример json'а который парсит библиотека:
-~~~
+import by.stolybko.api.DeSerializer;
+import by.stolybko.api.Serializer;
+import by.stolybko.api.impl.DeSerializerImpl;
+import by.stolybko.api.impl.SerializerImpl;
+import by.stolybko.entity.Store;
+
+
+public class Runner {
+
+static String json = """
 {
     "name": "UniverMag",
     "customers": [
@@ -63,7 +62,7 @@
             ]
         }
     ],
-    "products": [
+    "products" : [
         {
             "id": "3024a45d-f272-4189-a58c-fc24f2822bac",
             "name": "1colbasa",
@@ -71,13 +70,19 @@
         },
         {
             "id": "4024a45d-f272-4189-a58c-fc24f2822bac",
-            "name": "1colbasa",
+            "name" : "1colbasa",
             "price": 255.6
         }
     ]
 }
-~~~
+            """;
+    public static void main(String[] args) {
 
-Библиотека покрыта тестами:
-![test](img/test.png)
+        DeSerializer deSerializer = new DeSerializerImpl();
+        Store store = deSerializer.deSerializingJson(Store.class, json);
+        System.out.println(store);
+        Serializer serializer = new SerializerImpl();
+        System.out.println(serializer.serializingInJson(store));
 
+    }
+}
